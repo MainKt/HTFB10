@@ -2,7 +2,7 @@
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.13;
 
 interface IProfile {
     struct UserProfile {
@@ -14,7 +14,13 @@ interface IProfile {
 
 contract PostBoard is Ownable {
 
-    uint16 public MAX_post_LENGTH = 280;
+    uint16 public MAX_POST_LENGTH = 280;
+
+    struct Comment {
+        address commenter;
+        string content;
+        uint timestamp;
+    }
 
     struct Post {
         uint256 id;
@@ -22,6 +28,8 @@ contract PostBoard is Ownable {
         string content;
         uint256 timestamp;
         uint256 likes;
+        Comment[] comments;
+        uint256 totalComments;
     }
     mapping(address => Post[] ) public posts;
     // profile contract defined here 
@@ -31,6 +39,7 @@ contract PostBoard is Ownable {
     event PostCreated(uint256 id, address author, string content, uint256 timestamp);
     event PostLiked(address liker, address postAuthor, uint256 postId, uint256 newLikeCount);
     event PostUnliked(address unliker, address postAuthor, uint256 postId, uint256 newLikeCount);
+    event CommentAdded(address commenter, address postAuthor, uint postId, uint commentId, string content, uint timestamp);
 
     modifier onlyRegistered(){
         IProfile.UserProfile memory userProfileTemp = profileContract.getProfile(msg.sender);
@@ -43,13 +52,13 @@ contract PostBoard is Ownable {
     }
 
     function changePostLength(uint16 newPostLength) public onlyOwner {
-        MAX_post_LENGTH = newPostLength;
+        MAX_POST_LENGTH = newPostLength;
     }
 
     function getTotalLikes(address _author) external view returns(uint) {
         uint totalLikes;
 
-        for( uint i = 0; i < posts[_author].length; i++){
+        for(uint i = 0; i < posts[_author].length; i++) {
             totalLikes += posts[_author][i].likes;
         }
 
@@ -57,14 +66,16 @@ contract PostBoard is Ownable {
     }
 
     function createPost(string memory _post) public  onlyRegistered {
-        require(bytes(_post).length <= MAX_post_LENGTH, "Post is too long bro!" );
+        require(bytes(_post).length <= MAX_POST_LENGTH, "Post is too long!" );
 
         Post memory newPost = Post({
             id: posts[msg.sender].length,
             author: msg.sender,
             content: _post,
             timestamp: block.timestamp,
-            likes: 0
+            likes: 0,
+            totalComments: 0,
+            comments: new Comment[](0)
         });
 
         posts[msg.sender].push(newPost);
@@ -97,5 +108,19 @@ contract PostBoard is Ownable {
 
     function getAllPosts(address _owner) public view returns (Post[] memory ){
         return posts[_owner];
+    }
+
+    function commentOnPost(address _author, uint id, string memory _content) external onlyRegistered {
+        require(posts[_author][id].id == id, "POST DOES NOT EXIST");
+        require(bytes(_content).length > 0, "Comment cannot be empty");
+
+        posts[_author][id].comments.push(Comment({
+            commenter: msg.sender,
+            content: _content,
+            timestamp: block.timestamp
+        }));
+        posts[_author][id].totalComments++;
+
+        emit CommentAdded(msg.sender, _author, id, posts[_author][id].totalComments - 1, _content, block.timestamp);
     }
 }
