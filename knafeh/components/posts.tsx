@@ -1,9 +1,10 @@
+"use client"
 import { POSTBOARD } from "@/constants/contracts";
-import { useContract, useContractEvents } from "@thirdweb-dev/react";
+import { useContract, useContractEvents, useContractRead } from "@thirdweb-dev/react";
 
 const Posts = () => {
     const { contract: postBoardContract } = useContract(POSTBOARD);
-    const { data: posts, isLoading, error } = useContractEvents(postBoardContract, "PostCreated", {
+    const { data: posts, isLoading } = useContractEvents(postBoardContract, "PostCreated", {
         subscribe: true
     });
 
@@ -20,3 +21,4 @@ const Posts = () => {
 }
 
 export default Posts
+

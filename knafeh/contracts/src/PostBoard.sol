@@ -2,17 +2,6 @@
 
 pragma solidity ^0.8.0;
 
-interface IProfile {
-    struct UserProfile {
-        string displayName;
-        string bio;
-    }
-
-    function getProfile(
-        address _user
-    ) external view returns (UserProfile memory);
-}
-
 contract PostBoard {
     address owner;
     modifier onlyOwner() {
@@ -20,6 +9,10 @@ contract PostBoard {
         _;
     }
 
+    struct Profile {
+        string displayName;
+        string bio;
+    }
     uint16 public MAX_POST_LENGTH = 280;
 
     struct Post {
@@ -30,7 +23,6 @@ contract PostBoard {
         uint256 likes;
     }
     mapping(address => Post[]) public posts;
-    IProfile profileContract;
 
     event PostCreated(
         uint256 id,
@@ -51,9 +43,8 @@ contract PostBoard {
         uint256 newLikeCount
     );
 
-    constructor(address _profileContract) {
+    constructor() {
         owner = msg.sender;
-        profileContract = IProfile(_profileContract);
     }
 
     function changePostLength(uint16 newPostLength) public onlyOwner {
