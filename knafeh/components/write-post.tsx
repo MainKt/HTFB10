@@ -16,6 +16,7 @@ const WritePost = () => {
     return (
         <article>
             <textarea
+                placeholder='Write a post...'
                 ref={textareaRef}
                 name="Write something"
                 onChange={(e) => {

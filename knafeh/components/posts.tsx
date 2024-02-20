@@ -1,6 +1,7 @@
 "use client"
 import { POSTBOARD } from "@/constants/contracts";
 import { useContract, useContractEvents, useContractRead } from "@thirdweb-dev/react";
+import Avatar from "./avatar";
 
 const Posts = () => {
     const { contract: postBoardContract } = useContract(POSTBOARD);
@@ -10,8 +11,10 @@ const Posts = () => {
 
     return (
         <>
-            {!isLoading && posts?.map((post, index) => <article>
-                <header>{post.data.author}</header>
+            {!isLoading && posts?.map((post) => <article>
+                <header>
+                    <Avatar seed={post.data.content} />
+                    {post.data.author}</header>
                 {post.data.content}
                 <footer>{new Date(post.data.timestamp.toNumber() * 1000).toLocaleString()}</footer>
             </article>)
