@@ -51,16 +51,6 @@ contract PostBoard {
         uint256 newLikeCount
     );
 
-    modifier onlyRegistered() {
-        IProfile.UserProfile memory userProfileTemp = profileContract
-            .getProfile(msg.sender);
-        require(
-            bytes(userProfileTemp.displayName).length > 0,
-            "USER NOT REGISTERED"
-        );
-        _;
-    }
-
     constructor(address _profileContract) {
         owner = msg.sender;
         profileContract = IProfile(_profileContract);
@@ -80,11 +70,8 @@ contract PostBoard {
         return totalLikes;
     }
 
-    function createPost(string memory _post) public onlyRegistered {
-        require(
-            bytes(_post).length <= MAX_POST_LENGTH,
-            "Post is too long!"
-        );
+    function createPost(string memory _post) public {
+        require(bytes(_post).length <= MAX_POST_LENGTH, "Post is too long!");
 
         Post memory newPost = Post({
             id: posts[msg.sender].length,
@@ -105,7 +92,7 @@ contract PostBoard {
         );
     }
 
-    function likePost(address author, uint256 id) external onlyRegistered {
+    function likePost(address author, uint256 id) external {
         require(posts[author][id].id == id, "POST DOES NOT EXIST");
 
         posts[author][id].likes++;
@@ -114,7 +101,7 @@ contract PostBoard {
         emit PostLiked(msg.sender, author, id, posts[author][id].likes);
     }
 
-    function unlikePost(address author, uint256 id) external onlyRegistered {
+    function unlikePost(address author, uint256 id) external {
         require(posts[author][id].id == id, "POST DOES NOT EXIST");
         require(posts[author][id].likes > 0, "POST HAS NO LIKES");
 

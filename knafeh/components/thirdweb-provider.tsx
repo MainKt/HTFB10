@@ -17,7 +17,8 @@ const ThirdwebWrapper = ({ children }: { children: React.ReactNode }) => {
                 metamaskWallet(),
                 coinbaseWallet(),
                 walletConnect(),
-            ]}>
+            ]}
+        >
             {children}
         </ThirdwebProvider>
     )

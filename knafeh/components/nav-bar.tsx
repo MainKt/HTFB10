@@ -1,3 +1,5 @@
+"use client";
+import { ConnectWallet } from '@thirdweb-dev/react'
 import React from 'react'
 
 const NavBar = () => {
@@ -10,6 +12,7 @@ const NavBar = () => {
                 <li><a href="#">Home</a></li>
                 <li><a href="#">Messages</a></li>
                 <li><button className="secondary">Add services</button></li>
+                <li><ConnectWallet /></li>
             </ul>
         </nav>
     )
