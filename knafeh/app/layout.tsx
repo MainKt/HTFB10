@@ -24,7 +24,9 @@ export default function RootLayout({
             <NavBar />
           </header>
           <main className="container">
-            {children}
+            <div className="flex flex-col w-full max-w-md pb-12 mx-auto stretch">
+              {children}
+            </div>
           </main>
         </ThirdwebWrapper>
       </body>

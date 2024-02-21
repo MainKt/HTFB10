@@ -2,6 +2,27 @@
 
 pragma solidity ^0.8.0;
 
+interface IProfile {
+    struct UserProfile {
+        string displayName;
+        string bio;
+    }
+
+    function updateProfile(
+        string memory _displayName,
+        string memory _bio
+    ) external;
+
+    function setProfile(
+        string memory _displayName,
+        string memory _bio
+    ) external;
+
+    function getProfile(
+        address _user
+    ) external view returns (UserProfile memory);
+}
+
 contract PostBoard {
     address owner;
     modifier onlyOwner() {
@@ -21,12 +42,14 @@ contract PostBoard {
         string content;
         uint256 timestamp;
         uint256 likes;
+        string media;
     }
     mapping(address => Post[]) public posts;
 
     event PostCreated(
         uint256 id,
         address author,
+        string displayName,
         string content,
         uint256 timestamp
     );
@@ -42,9 +65,12 @@ contract PostBoard {
         uint256 postId,
         uint256 newLikeCount
     );
+    event ProfileUpdated(address user, string displayName, string bio);
 
-    constructor() {
+    IProfile profileContract;
+    constructor(address _profileContract) {
         owner = msg.sender;
+        profileContract = IProfile(_profileContract);
     }
 
     function changePostLength(uint16 newPostLength) public onlyOwner {
@@ -61,15 +87,46 @@ contract PostBoard {
         return totalLikes;
     }
 
+    function toString(address _addr) internal pure returns (string memory) {
+        bytes32 value = bytes32(uint256(uint160(_addr)));
+        bytes memory alphabet = "0123456789abcdef";
+
+        bytes memory str = new bytes(42);
+        str[0] = "0";
+        str[1] = "x";
+
+        for (uint256 i = 0; i < 20; i++) {
+            str[2 + i * 2] = alphabet[uint8(value[i + 12] >> 4)];
+            str[3 + i * 2] = alphabet[uint8(value[i + 12] & 0x0f)];
+        }
+
+        return string(str);
+    }
+
     function createPost(string memory _post) public {
         require(bytes(_post).length <= MAX_POST_LENGTH, "Post is too long!");
+
+        IProfile.UserProfile memory userProfileTemp = profileContract
+            .getProfile(msg.sender);
+        if (bytes(userProfileTemp.displayName).length == 0) {
+            profileContract.setProfile(
+                toString(msg.sender),
+                "Tell us something about yourself"
+            );
+            emit ProfileUpdated(
+                msg.sender,
+                toString(msg.sender),
+                "Tell us something about yourself"
+            );
+        }
 
         Post memory newPost = Post({
             id: posts[msg.sender].length,
             author: msg.sender,
             content: _post,
             timestamp: block.timestamp,
-            likes: 0
+            likes: 0,
+            media: ""
         });
 
         posts[msg.sender].push(newPost);
@@ -78,7 +135,8 @@ contract PostBoard {
         emit PostCreated(
             newPost.id,
             newPost.author,
-            newPost.content,
+            userProfileTemp.displayName,
+            _post,
             newPost.timestamp
         );
     }
@@ -107,5 +165,17 @@ contract PostBoard {
 
     function getAllPosts(address _owner) public view returns (Post[] memory) {
         return posts[_owner];
+    }
+
+    function updateProfile(
+        string memory _displayName,
+        string memory _bio
+    ) public {
+        profileContract.updateProfile(_displayName, _bio);
+        emit ProfileUpdated(msg.sender, _displayName, _bio);
+    }
+
+    function getProfile() external view returns (IProfile.UserProfile memory) {
+        return profileContract.getProfile(msg.sender);
     }
 }

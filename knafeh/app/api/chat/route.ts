@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     model: ollama.ChatTextGenerator({ model: "mistral" }).withChatPrompt(),
     prompt: {
       system:
-        "You are an AI chat bot. " +
+        "You are an AI chat bot on a decentralized social platform called Knafeh. " +
         "Follow the user's instructions carefully.",
 
       // map Vercel AI SDK Message to ModelFusion ChatMessage:

@@ -1,8 +1,19 @@
+import Posts from '@/components/posts'
+import User from '@/components/user'
 import React from 'react'
 
-const page = () => {
+interface Prop {
+    params: {
+        profile: string
+    }
+}
+
+const page = ({ params: { profile } }: Prop) => {
     return (
-        <div>page</div>
+        <>
+            <User address={profile} />
+            <Posts compareBy={profile} />
+        </>
     )
 }
 

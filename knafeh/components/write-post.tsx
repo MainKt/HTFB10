@@ -2,6 +2,7 @@
 import { Web3Button, useContract, useContractWrite } from '@thirdweb-dev/react';
 import { POSTBOARD } from '@/constants/contracts';
 import React, { useRef, useState } from 'react'
+import { ImageIcon } from 'lucide-react';
 
 const WritePost = () => {
     const [content, setContent] = useState("");
@@ -27,7 +28,8 @@ const WritePost = () => {
                 className='p-4'
             >
             </textarea>
-            <footer className='container flex justify-center'>
+            <div className='flex justify-center mt-4'>
+                {/* <input type="file" /> */}
                 <Web3Button
                     contractAddress={POSTBOARD}
                     action={() => {
@@ -38,7 +40,7 @@ const WritePost = () => {
                 >
                     Post
                 </Web3Button>
-            </footer>
+            </div>
         </article >
     )
 }
